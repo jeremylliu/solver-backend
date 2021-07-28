@@ -5,12 +5,13 @@ main = flask.Blueprint('main', __name__)
 cors = CORS(main, resources={r"/api/*": {"origins": "*"}})
 
 
-@main.route('/')
-def main_index():
-    return "Hello World"
-
-
-@main.route("/api/image/", methods=["GET", "POST"])
+@main.route("/api/image/", methods=["POST"])
 def process_image():
     picture = flask.request.json
     return picture["image"]
+
+
+@main.route("/api/solve/", methods=["POST"])
+def solve():
+    board = flask.request.json
+    return "recieved"
