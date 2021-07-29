@@ -1,5 +1,6 @@
 import flask
 from flask_cors import CORS
+from image_processing.process import process
 
 main = flask.Blueprint('main', __name__)
 cors = CORS(main, resources={r"/api/*": {"origins": "*"}})
@@ -8,7 +9,8 @@ cors = CORS(main, resources={r"/api/*": {"origins": "*"}})
 @main.route("/api/image/", methods=["POST"])
 def process_image():
     picture = flask.request.json
-    return picture["image"]
+    board = process(picture["image"])
+    return board
 
 
 @main.route("/api/solve/", methods=["POST"])
