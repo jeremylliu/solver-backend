@@ -25,7 +25,7 @@ def deskew(img):
     rot_mat[1, 2] += (width - old_width) / 2
     rot_mat[0, 2] += (height - old_height) / 2
     newImg = cv2.warpAffine(
-        img, rot_mat, (int(round(height)), int(round(width))), borderValue=(0, 0, 0))
+        img, rot_mat, (int(round(height)), int(round(width))), borderValue=(0, 0, 0), borderMode=cv2.BORDER_REPLICATE)
     return newImg
 
 
