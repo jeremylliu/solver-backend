@@ -1,0 +1,3 @@
+[console_scripts]
+deskew = deskew.cli:main
+
