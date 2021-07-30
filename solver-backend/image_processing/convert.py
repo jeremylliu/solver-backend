@@ -7,11 +7,3 @@ def base64ToImage(imageStr):
     imageStr = imageStr[22:]
     img = io.BytesIO(base64.b64decode(imageStr))
     return img.read()
-
-
-"""
-testing code
-imageData = ""
-with open("testing.jpeg", "wb") as fh:
-    fh.write(base64ToImage(imageData))
-"""

@@ -1,5 +1,5 @@
-from convert import base64ToImage
-from read import readTiles
+from image_processing.convert import base64ToImage
+from image_processing.read import readTiles
 
 
 def process(imgStr):
