@@ -27,4 +27,4 @@ def emphasis(img):
     white_wash = cv2.inRange(newImg, white_range_lower, white_range_upper)
     newImg[white_wash == 255] = white
 
-    return img
+    return newImg

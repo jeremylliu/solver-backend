@@ -5,6 +5,7 @@ from computer_vision.image_processing.deglare import deglare
 from computer_vision.image_processing.emphasis import emphasis
 from computer_vision.image_processing.clarify import clarify
 from computer_vision.image_processing.deskew import deskew
+from computer_vision.image_processing.clean import clean
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/local/bin/tesseract'
 
@@ -14,92 +15,109 @@ def readTiles(jpeg):
     nparr = np.frombuffer(jpeg, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
 
-    # # clean up the image to become more readable for tesseract
+    # clean up the image to become more readable for tesseract
     img = cv2.GaussianBlur(img, (7, 7), 1)
     # img = deglare(img)
     img = emphasis(img)
     img = clarify(img)
     img = deskew(img)
 
-    black_range_lower = np.array([0, 0, 0])
-    black_range_upper = np.array([1, 1, 1])
-    black_wash = cv2.inRange(img, black_range_lower, black_range_upper)
-    img[black_wash == 255] = [0, 255, 0]
+    # removes some background noise
+    img = clean(img)
 
-    color_range_lower = np.array([0, 0, 0])
-    color_range_upper = np.array([255, 254, 255])
-    color_wash = cv2.inRange(img, color_range_lower, color_range_upper)
-    img[color_wash == 255] = [255, 255, 255]
-
-    cv2.imshow('cleaned img', img)
-    cv2.waitKey(0)
+    # cv2.imshow('cleaned img', img)
+    # cv2.waitKey(0)
+    print("processed image")
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # """
-    # TRYTING TO GET CONTOUR FOR SHAPE
-    thresh = cv2.threshold(gray, 127, 255,
+    # detects the contour for the playing grid
+    thresh = cv2.threshold(gray, 0, 255,
                            cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
+    max_area = 0
     for cnt in contours:
         area = cv2.contourArea(cnt)
         approx = cv2.approxPolyDP(
             cnt, 0.05 * cv2.arcLength(cnt, True), True)
-        cv2.drawContours(img, [cnt], 0, (0, 0, 255), 5)
-        # Approximate what type of shape this is
-        if len(approx) == 4 and area > 8000:
+        if len(approx) == 4 and area > max_area:
             x, y, w, h = cv2.boundingRect(cnt)
-            print("THIS SHAPE", x, y, area)
-            cv2.putText(img, "square", (x, y),
-                        cv2.FONT_HERSHEY_COMPLEX, .7, (255, 0, 255), 1)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-            cv2.imshow('rotated img', img)
-            cv2.waitKey(0)
-    # """
+            crop = img[y:y+h, x:x+w]
+            max_area = area
+
+    img = cv2.bitwise_not(crop)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # cv2.imshow('crop', img)
+    # cv2.waitKey(0)
+    print("found grid")
 
     # find contours to detect individual letters
     thresh = cv2.threshold(gray, 127, 255,
                            cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_CCOMP,
                                            cv2.CHAIN_APPROX_SIMPLE)
-
-    # draw the contours
-    img_contour = img.copy()
-    for i in range(len(contours)):
-        area = cv2.contourArea(contours[i])
-        if 100 < area < 3000:
-            cv2.drawContours(img_contour, contours, i, (0, 0, 255), 2)
-
-    # sort the contours
-    boundingBoxes = [cv2.boundingRect(c) for c in contours]
-    (contours, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes),
-                                            key=lambda b: b[1][1], reverse=True))
 
     # read the contours into text
     detected = []
-    for c in contours:
-        x, y, w, h = cv2.boundingRect(c)
-        ratio = h/w
-        area = cv2.contourArea(c)
-        base = np.ones(thresh.shape, dtype=np.uint8)
-        if ratio > 0.9 and 100 < area < 3000:
-            base[y:y+h, x:x+w] = thresh[y:y+h, x:x+w]
-            segment = cv2.bitwise_not(base)
+    custom_config = r'--oem 3 --psm 10 -c tessedit_char_whitelist="ABCDEFGHIJKLMNOPQRSTUVWXYZl" '
 
-            custom_config = r'--oem 3 --psm 10 -c tessedit_char_whitelist="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" '
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > 2500:
+            x, y, w, h = cv2.boundingRect(cnt)
+            approx = cv2.approxPolyDP(
+                cnt, 0.05 * cv2.arcLength(cnt, True), True)
+
+        if len(approx) == 4 and area > 2500 and area < 10000:
+            segment = img[y+5:y+h-10, x+5:x+w-10]
+            kernel = np.ones((4, 4), np.uint8)
+            segment = cv2.dilate(segment, kernel, iterations=1)
+            segment = cv2.GaussianBlur(segment, (5, 5), 1)
+
             c = pytesseract.image_to_string(
                 segment, config=custom_config).strip(' \n\t\x0c')
-            detected.append(c)
-            print(c, [x, y, w, h])
-            cv2.imshow("segment", segment)
-            cv2.waitKey(0)
+            if c == "":
+                c = "I"
+            if(len(c) <= 1):
+                detected.append({"guess": c, "x": x, "y": y})
+                # print(c, [x, y, w, h], area)
+                # cv2.imshow("segment", segment)
+                # cv2.waitKey(0)
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    print("found letters")
 
-    return detected
+    # sort results
+    yRange = []
+    yDic = {}
+    exists = False
+    for guess in detected:
+        if len(yRange) == 0:
+            yRange.append(guess["y"])
+            yDic[guess["y"]] = [guess]
+        else:
+            for y in yRange:
+                if abs(y - guess["y"]) < 15:
+                    exists = True
+                    yDic[y].append(guess)
+                    break
+            if exists == False:
+                yRange.append(guess["y"])
+                yDic[guess["y"]] = [guess]
+            exists = False
+
+    board = []
+    for y in reversed([*yDic]):
+        yDic[y] = sorted(yDic[y], key=lambda i: i['x'], reverse=False)
+        for value in yDic[y]:
+            board.append(value['guess'])
+
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    return board
