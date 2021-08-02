@@ -113,9 +113,10 @@ def readTiles(jpeg):
 
     board = []
     for y in reversed([*yDic]):
-        yDic[y] = sorted(yDic[y], key=lambda i: i['x'], reverse=False)
-        for value in yDic[y]:
-            board.append(value['guess'])
+        if len(yDic[y]) == 4:
+            yDic[y] = sorted(yDic[y], key=lambda i: i['x'], reverse=False)
+            for value in yDic[y]:
+                board.append(value['guess'])
 
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
