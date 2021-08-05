@@ -82,7 +82,7 @@ def readTiles(jpeg):
 
             c = pytesseract.image_to_string(
                 segment, config=custom_config).strip(' \n\t\x0c')
-            if c == "":
+            if c == "" or c == "l":
                 c = "I"
             if(len(c) <= 1):
                 detected.append({"guess": c, "x": x, "y": y})

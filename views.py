@@ -10,7 +10,7 @@ cors = CORS(main, resources={r"/api/*": {"origins": "*"}})
 @main.route("/api/image/", methods=["POST"])
 def process_image():
     picture = flask.request.json
-    board = process(picture["image"])
+    board = process(picture["data"])
     return json.dumps(board)
 
 
