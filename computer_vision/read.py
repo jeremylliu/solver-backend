@@ -40,14 +40,18 @@ def readTiles(jpeg):
                                            cv2.CHAIN_APPROX_SIMPLE)
 
     max_area = 0
+    cropped = False
     for cnt in contours:
         area = cv2.contourArea(cnt)
         approx = cv2.approxPolyDP(
             cnt, 0.05 * cv2.arcLength(cnt, True), True)
         if len(approx) == 4 and area > max_area:
+            cropped = True
             x, y, w, h = cv2.boundingRect(cnt)
             crop = img[y:y+h, x:x+w]
             max_area = area
+    if not cropped:
+        crop = img
 
     img = cv2.bitwise_not(crop)
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)

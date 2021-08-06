@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from load_words import load_words
+from solver.load_words import load_words
 
 
 def recursiveCheck(trie, board, path, word, allPaths):
