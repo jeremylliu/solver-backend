@@ -3,6 +3,21 @@ import copy
 from solver.load_words import load_words
 
 
+def solveBoard(board):
+    trie = load_words()
+    board2D = np.reshape(board, (4, 4))
+
+    allPaths = {}
+
+    for i in range(16):
+        path = {0: i}
+        word = ""
+        word += board[i]
+        allPaths = recursiveCheck(trie, board2D, path, word, allPaths)
+
+    return allPaths
+
+
 def recursiveCheck(trie, board, path, word, allPaths):
     # computes current place in 4x4 grid
     loc = path[len(path) - 1]
@@ -49,21 +64,6 @@ def recursiveCheck(trie, board, path, word, allPaths):
                         # if not a prefix, end
                         else:
                             return allPaths
-
-    return allPaths
-
-
-def solve(board):
-    trie = load_words()
-    board2D = np.reshape(board, (4, 4))
-
-    allPaths = {}
-
-    for i in range(16):
-        path = {0: i}
-        word = ""
-        word += board[i]
-        allPaths = recursiveCheck(trie, board2D, path, word, allPaths)
 
     return allPaths
 

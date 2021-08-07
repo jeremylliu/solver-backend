@@ -12,6 +12,8 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/local/bin/tesseract'
 
 def readTiles(jpeg):
     # convert jpeg into np.ndarray that opencv reads
+    if not jpeg:
+        return []
     nparr = np.frombuffer(jpeg, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
 

@@ -2,7 +2,7 @@ import json
 import flask
 from flask_cors import CORS
 from computer_vision.process import process
-from solver.solve import solve
+from solver.solve import solveBoard
 
 main = flask.Blueprint('main', __name__)
 cors = CORS(main, resources={r"/api/*": {"origins": "*"}})
@@ -18,5 +18,5 @@ def process_image():
 @main.route("/api/solve/", methods=["POST"])
 def solve():
     board = flask.request.json
-    solutions = solve(board)
+    solutions = solveBoard(board["data"])
     return solutions
