@@ -1,8 +1,9 @@
 import flask
 from flask_cors import CORS
 
-# from .extensions import X
 from views import *
+
+app = flask.Flask(__name__)
 
 
 def create_app(config_file="settings.py"):
@@ -13,3 +14,7 @@ def create_app(config_file="settings.py"):
     app.register_blueprint(main)
 
     return app
+
+
+if __name__ == '__main__':
+    app.run(threaded=True, port=5000)
