@@ -20,3 +20,8 @@ def solve():
     board = flask.request.json
     solutions = solveBoard(board["data"])
     return solutions
+
+
+@main.route("/")
+def test():
+    return "hello world"
