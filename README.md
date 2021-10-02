@@ -4,7 +4,7 @@ This is the source code of the backend API that is accessed by the <ins>frontend
 
 Here is an example of a processable image
 
-![example of game board](image.png)
+![example of game board](https://imgur.com/a/M9AlFMp)
 
 Then, this image is processed through a variety of methods before the letters are extracted using a combination of OpenCV2 for boundery detection and PyTesseract for letter detection. Finally, the board is then sorted before it is returned to the frontend for a user confirmation.
 
