@@ -1,6 +1,4 @@
-import flask
-from flask_cors import CORS
-
+import cv2
 from views import *
 
 app = flask.Flask(__name__)
@@ -17,4 +15,4 @@ def create_app(config_file="settings.py"):
 
 
 if __name__ == '__main__':
-    app.run(threaded=True, port=5000)
+    app.run(threaded=True, port=3001)

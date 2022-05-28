@@ -22,6 +22,6 @@ def solve():
     return solutions
 
 
-@main.route("/")
+@main.route("/", methods=["GET"])
 def test():
     return "Hello World"
