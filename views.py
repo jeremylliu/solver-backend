@@ -13,6 +13,7 @@ def process_image():
     try:
         picture = flask.request.json
         board = process(picture["data"])
+        print("got board", board)
         return json.dumps(board)
     except Exception as e:
         return "Error"

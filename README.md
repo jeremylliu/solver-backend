@@ -4,7 +4,7 @@ This is the source code of the backend API that is accessed by the <ins>frontend
 
 Here is an example of a processable image
 
-![https://imgur.com/a/M9AlFMp](https://imgur.com/a/M9AlFMp)
+![Example](https://imgur.com/a/M9AlFMp)
 
 Then, this image is processed through a variety of methods before the letters are extracted using a combination of OpenCV2 for boundery detection and PyTesseract for letter detection. Finally, the board is then sorted before it is returned to the frontend for a user confirmation.
 
@@ -12,12 +12,12 @@ Once a user confirms the state of the board (or manually enters it), the backend
 
 ## Getting started
 
-Once you have the backend downloaded, you must run
+Once you have the backend downloaded, you can simply run
 ```
-source venv/bin/activate
+docker build . -t solver-backend
 ```
 to enter the virtual enviroment and then run
 ```
-flask run
+docker run -p 3001:3001 -it solver-backend
 ```
-to begin running the backend server.
+to begin running the backend server. Make sure you have docker installed and a docker daemon running in the background.
